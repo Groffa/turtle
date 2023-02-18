@@ -1,60 +1,90 @@
-export type Board = {
-    Rows: number;
-    Columns: number;
-}
+export type Position = {
+  X: number;
+  Y: number;
+};
 
-export const createBoard = (Columns: number, Rows: number): Board => ({
-    Rows, Columns
-})
+export type Board = {
+  Width: number;
+  Height: number;
+  Blocked: Position[];
+};
 
 export const enum Heading {
-    North = 0,
-    East = 1,
-    South = 2,
-    West = 3
+  North = 0,
+  East = 1,
+  South = 2,
+  West = 3,
 }
+
+export type Turtle = Position & {
+  Heading: Heading;
+};
+
+export const createBoard = (Width: number, Height: number): Board => ({
+  Width,
+  Height,
+  Blocked: [],
+});
 
 const HeadingDeltas: Record<Heading, [number, number]> = {
-    [Heading.North]: [0, -1],
-    [Heading.East]: [1, 0],
-    [Heading.South]: [0, 1],
-    [Heading.West]: [0, -1]
-}
+  [Heading.North]: [0, -1],
+  [Heading.East]: [1, 0],
+  [Heading.South]: [0, 1],
+  [Heading.West]: [0, -1],
+};
 
-export type Turtle = {
-    Row: number;
-    Column: number;
-    Heading: Heading;
-}
+export const clamp = (min: number, value: number, max: number): number =>
+  Math.min(Math.max(min, value), max);
 
-export const clamp = (min: number, value: number, max: number): number => Math.min(Math.max(min, value), max);
+export const block = (X: number, Y: number, board: Board): Board => ({
+    ...board,
+    Blocked: [...board.Blocked, {X, Y}]
+})
 
-export const advance = (turtle: Turtle, board: Board): Turtle => {    
-    const delta = HeadingDeltas[turtle.Heading];
-    return {
-        ...turtle,
-        Column: clamp(0, turtle.Column + delta[0], board.Columns - 1),
-        Row: clamp(0, turtle.Row + delta[1], board.Rows - 1)
-    }
-}
+export const unblock = (X: number, Y: number, board: Board): Board => ({
+    ...board,
+    Blocked: board.Blocked.filter(p => p.X !== X && p.Y !== Y)
+})
+
+export const blocked = (X: number, Y: number, board: Board): boolean =>
+  !!board.Blocked.find((p) => p.X === X && p.Y === Y);
+
+export const advance = (turtle: Turtle, board: Board): Turtle => {
+  const delta = HeadingDeltas[turtle.Heading];
+  const newTurtle = {
+    ...turtle,
+    X: clamp(0, turtle.X + delta[0], board.Width - 1),
+    Y: clamp(0, turtle.Y + delta[1], board.Height - 1),
+  };
+  if (blocked(newTurtle.X, newTurtle.Y, board)) {
+    return turtle;
+  } else {
+    return newTurtle;
+  }
+};
 
 export const rotateRight = (turtle: Turtle): Turtle => ({
-    ...turtle,
-    Heading: ((turtle.Heading + 1) % 4) as Heading
-})
+  ...turtle,
+  Heading: ((turtle.Heading + 1) % 4) as Heading,
+});
 
 export const rotateLeft = (turtle: Turtle): Turtle => ({
-    ...turtle,
-    Heading: turtle.Heading === Heading.North ? Heading.West : (turtle.Heading - 1) as Heading
-})
+  ...turtle,
+  Heading:
+    turtle.Heading === Heading.North
+      ? Heading.West
+      : ((turtle.Heading - 1) as Heading),
+});
 
-export const turnAround = (turtle: Turtle): Turtle => rotateRight(rotateRight(turtle))
+export const turnAround = (turtle: Turtle): Turtle =>
+  rotateRight(rotateRight(turtle));
 
-const defaultBoardColumns = 10
-const defaultBoardRows = 12;
-export const defaultEmptyBoard = () => createBoard(defaultBoardColumns, defaultBoardRows);
+const defaultBoardWidth = 10;
+const defaultBoardHeight = 12;
+export const defaultEmptyBoard = () =>
+  createBoard(defaultBoardWidth, defaultBoardHeight);
 export const defaultTurtle = (): Turtle => ({
-    Heading: Heading.North,
-    Column: defaultBoardColumns / 2,
-    Row: defaultBoardRows - 1
-})
+  Heading: Heading.North,
+  X: defaultBoardWidth / 2,
+  Y: defaultBoardHeight - 1,
+});

@@ -1,4 +1,4 @@
-import { advance, Board, clamp, createBoard, defaultEmptyBoard, defaultTurtle, Heading, rotateLeft, rotateRight, turnAround, Turtle } from "./Logic";
+import { advance, block, blocked, Board, clamp, createBoard, defaultEmptyBoard, defaultTurtle, Heading, rotateLeft, rotateRight, turnAround, Turtle, unblock } from "./Logic";
 
 describe("Logic", () => {
     let board: Board;
@@ -22,9 +22,20 @@ describe("Logic", () => {
     describe("Board", () => {
         it("create board of desired size", () => {
             expect(createBoard(25, 39)).toEqual({
-                Columns: 25,
-                Rows: 39
+                Width: 25,
+                Height: 39,
+                Blocked: []
             } as Board)
+        })
+
+        it("blocks 1,1", () => {
+            const blockedBoard = block(1, 1, board);
+            expect(blocked(1, 1, blockedBoard)).toBe(true);
+        })
+
+        it("blocks 1,1 and unblocks it makes it clear", () => {
+            const notBlockedBoard = unblock(1, 1, block(1, 1, board));
+            expect(blocked(1, 1, notBlockedBoard)).toBe(false);
         })
     });
 
@@ -33,8 +44,8 @@ describe("Logic", () => {
             const newTurtle = advance(turtle, board);
             expect(newTurtle).toEqual({
                 ...turtle,
-                Row: turtle.Row - 1
-            })
+                Y: turtle.Y - 1
+            } as Turtle)
         })
 
         it("rotates turtle to the right once", () => {
@@ -71,13 +82,13 @@ describe("Logic", () => {
     describe("Turtle and Board", () => {
         it("can't move turtle beyond top row", () => {
             let movedTurtle: Turtle = { ...turtle };
-            for (let i = 0; i < board.Rows * 2; ++i) {
+            for (let i = 0; i < board.Height * 2; ++i) {
                 movedTurtle = advance(movedTurtle, board);
             }
             expect(movedTurtle).toEqual({
                 ...turtle,
-                Row: 0
-            })
+                Y: 0
+            } as Turtle)
         })
     })
 });
