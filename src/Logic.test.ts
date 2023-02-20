@@ -53,6 +53,27 @@ describe("Logic", () => {
       const notBlockedBoard = unblock(1, 1, block(1, 1, board));
       expect(blocked(1, 1, notBlockedBoard)).toBe(false);
     });
+
+    it("[3x3] blocks 2,0 and 2,1 and unblocks 2,1 should make 2,0 still block", () => {
+      const firstAndFinalState = block(2, 0, createBoard(3, 3));
+      const secondState = block(2, 1, firstAndFinalState);
+      expect(secondState).toEqual<Board>({
+        Width: 3,
+        Height: 3,
+        Blocked: [
+          {
+            X: 2,
+            Y: 0,
+          },
+          {
+            X: 2,
+            Y: 1,
+          },
+        ],
+      });
+      const secondStateReverted = unblock(2, 1, secondState);
+      expect(secondStateReverted).toEqual<Board>(firstAndFinalState);
+    });
   });
 
   describe("Turtle", () => {

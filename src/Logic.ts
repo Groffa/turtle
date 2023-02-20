@@ -37,14 +37,14 @@ export const clamp = (min: number, value: number, max: number): number =>
   Math.min(Math.max(min, value), max);
 
 export const block = (X: number, Y: number, board: Board): Board => ({
-    ...board,
-    Blocked: [...board.Blocked, {X, Y}]
-})
+  ...board,
+  Blocked: [...board.Blocked, { X, Y }],
+});
 
 export const unblock = (X: number, Y: number, board: Board): Board => ({
-    ...board,
-    Blocked: board.Blocked.filter(p => p.X !== X && p.Y !== Y)
-})
+  ...board,
+  Blocked: board.Blocked.filter((p) => !(p.X === X && p.Y === Y)),
+});
 
 export const blocked = (X: number, Y: number, board: Board): boolean =>
   !!board.Blocked.find((p) => p.X === X && p.Y === Y);
