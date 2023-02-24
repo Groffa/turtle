@@ -1,0 +1,19 @@
+name: build
+run-name: Do a production build and store it as an artifact
+on: [push]
+jobs:
+  test-and-build-it:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16.16'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - name: 'Upload production build'
+        uses: actions/upload-artifact@v3
+        with:
+          name: turtle
+          path: build
