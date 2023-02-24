@@ -20,17 +20,11 @@ export type Turtle = Position & {
   Heading: Heading;
 };
 
-export const createBoard = (Width: number, Height: number): Board => ({
-  Width,
-  Height,
-  Blocked: [],
-});
-
 const HeadingDeltas: Record<Heading, [number, number]> = {
   [Heading.North]: [0, -1],
   [Heading.East]: [1, 0],
   [Heading.South]: [0, 1],
-  [Heading.West]: [0, -1],
+  [Heading.West]: [-1, 0],
 };
 
 export const clamp = (min: number, value: number, max: number): number =>
@@ -81,10 +75,23 @@ export const turnAround = (turtle: Turtle): Turtle =>
 
 const defaultBoardWidth = 10;
 const defaultBoardHeight = 12;
+
+export const createBoard = (Width: number, Height: number): Board => ({
+  Width,
+  Height,
+  Blocked: [],
+});
 export const defaultEmptyBoard = () =>
   createBoard(defaultBoardWidth, defaultBoardHeight);
-export const defaultTurtle = (): Turtle => ({
-  Heading: Heading.North,
-  X: defaultBoardWidth / 2,
-  Y: defaultBoardHeight - 1,
+
+export const createTurtle = (
+  Heading: Heading,
+  X: number,
+  Y: number
+): Turtle => ({
+  Heading,
+  X,
+  Y,
 });
+export const defaultTurtle = (): Turtle =>
+  createTurtle(Heading.North, defaultBoardWidth / 2, defaultBoardHeight - 1);

@@ -5,6 +5,7 @@ import {
   Board,
   clamp,
   createBoard,
+  createTurtle,
   defaultEmptyBoard,
   defaultTurtle,
   Heading,
@@ -135,6 +136,21 @@ describe("Logic", () => {
       expect(advance(advance(leonardo, blockedBoard), blockedBoard)).toEqual(
         leonardo
       );
+    });
+
+    it.each([
+      ["north", Heading.North, 1, 0],
+      ["east", Heading.East, 2, 1],
+      ["south", Heading.South, 1, 2],
+      ["west", Heading.West, 0, 1],
+    ])("walks towards %s (%p) and ends up at %i, %i", (dir, heading, x, y) => {
+      const chess = createBoard(3, 3);
+      const donatello = createTurtle(heading, 1, 1);
+      expect(advance(donatello, chess)).toEqual<Turtle>({
+        ...donatello,
+        X: x,
+        Y: y,
+      });
     });
   });
 });
