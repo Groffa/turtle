@@ -7,9 +7,9 @@ export type State = {
 };
 
 export const enum Instruction {
-  Forward = "forward",
-  TurnRight = "turnright",
-  TurnLeft = "turnleft",
+  Forward = "f",
+  TurnRight = "r",
+  TurnLeft = "l",
 }
 
 export const execute = (state: State, instruction: Instruction): State => {

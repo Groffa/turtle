@@ -26,15 +26,15 @@ const useStyles = () =>
     },
   });
 
-export type BoardComponentProps = {
+export type DebugBoardComponentProps = {
   board: Board;
   setBoard: (value: React.SetStateAction<Board>) => void;
 };
 
-export const BoardComponent = ({
+export const DebugBoardComponent = ({
   board,
   setBoard,
-}: BoardComponentProps): JSX.Element => {
+}: DebugBoardComponentProps): JSX.Element => {
   const styles = useStyles();
 
   const toggleBlock = useCallback(
