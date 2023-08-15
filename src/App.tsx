@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { WorldStateComponent } from "./components/WorldState";
 import { makeCSS } from "./Css";
 import { Example1 } from "./examples/Example1";
@@ -36,59 +36,52 @@ const useStyles = () =>
     },
   });
 
+const { state: initialWorldState, goal, solution } = Example1();
+
 function App() {
-  const { state: initialWorldState, solution } = Example1();
+  const styles = useStyles();
   const [worldState, setWorldState] = useState<State>(initialWorldState);
-  const [commands, setCommands] = useState("");
+  const [commands, setCommands] = useState(solution);
   const [commandArray, setCommandArray] = useState<string[]>([]);
   const [lastCommandIndex, setLastCommandIndex] = useState(0);
-  const styles = useStyles();
-
-  const parse = useCallback(
-    (value: string) => {
-      if (value !== commands) {
-        setLastCommandIndex(0);
-      }
-      setCommands(value);
-      setCommandArray(
-        value
-          .replaceAll("\n", " ")
-          .split(" ")
-          .filter((s) => s.trim() !== "")
-      );
-    },
-    [commands]
-  );
+  const [nextInstructionInQueue, setNextInstructionInQueue] = useState("");
+  const [reachedGoal, setReachedGoal] = useState(false);
 
   useEffect(() => {
-    if (solution) {
-      parse(solution);
-    }
-  }, [solution, parse]);
+    setNextInstructionInQueue(commandArray?.at(lastCommandIndex) ?? "");
+  }, [commandArray, lastCommandIndex]);
 
-  const onCommandsChanged = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
-    parse(e.target.value);
+  useEffect(() => {
+    setCommandArray(sanitize(commands) ?? []);
+  }, [commands]);
 
-  const resetWorldState = () => {
+  useEffect(() => {
+    setReachedGoal(
+      worldState.turtle.X === goal?.X && worldState.turtle.Y === goal.Y
+    );
+  }, [worldState]);
+
+  const onCommandsChanged = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCommands(e.target.value);
+  };
+
+  const onResetWorldState = () => {
     setWorldState(initialWorldState);
     setLastCommandIndex(0);
   };
 
-  const stepRun = () => {
-    const instruction = nextInstructionInQueue() as Instruction;
+  const onStepRun = () => {
+    const instruction = commandArray[lastCommandIndex] as Instruction;
     setWorldState((prev) => execute(prev, instruction));
     setLastCommandIndex((prev) => {
       return Math.min(prev + 1, commandArray.length - 1);
     });
   };
 
-  const nextInstructionInQueue = () =>
-    commandArray.at(lastCommandIndex)?.toLowerCase();
-
   return (
     <>
       <main style={styles.main}>
-        <WorldStateComponent state={worldState} />
+        <WorldStateComponent state={worldState} goal={goal} />
         <div style={styles.rightPane}>
           <textarea
             style={styles.commands}
@@ -96,17 +89,24 @@ function App() {
             onChange={onCommandsChanged}
           />
           <div style={styles.stepRun}>
-            <button onClick={stepRun}>
-              {`⏯️ Step run ${nextInstructionInQueue()} (${
-                lastCommandIndex + 1
-              } / ${commandArray.length})`}
+            <button onClick={onStepRun}>
+              {`Step run ${nextInstructionInQueue} (${lastCommandIndex + 1} / ${
+                commandArray.length
+              })`}
             </button>
-            <button onClick={resetWorldState}>Reset</button>
+            <button onClick={onResetWorldState}>Reset</button>
+            {reachedGoal && <b>🏁 GOAL REACHED!</b>}
           </div>
         </div>
       </main>
     </>
   );
 }
+
+const sanitize = (commandBuffer?: string) =>
+  commandBuffer
+    ?.replaceAll("\n", " ")
+    .split(" ")
+    .filter((s) => s.trim() !== "");
 
 export default App;

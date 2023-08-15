@@ -1,6 +1,7 @@
+import { useEffect, useState } from "react";
 import { makeCSS, mergeCSS } from "../Css";
 import { State } from "../Execute";
-import { blocked } from "../Logic";
+import { Position, blocked } from "../Logic";
 
 const useStyles = () =>
   makeCSS({
@@ -35,16 +36,27 @@ const useStyles = () =>
 
 type WorldStateComponentProps = {
   state: State;
+  goal?: Position;
 };
+
+const victoryFlag = <>🏁</>;
 
 export const WorldStateComponent = ({
   state,
+  goal,
 }: WorldStateComponentProps): JSX.Element => {
   const styles = useStyles();
   const { board, turtle } = state;
 
-  const renderTurtle = () => {
-    return ["^", ">", "v", "<"][turtle.Heading];
+  const [turtleIcon, setTurtleIcon] = useState("");
+
+  useEffect(() => {
+    setTurtleIcon(["^", ">", "v", "<"][turtle.Heading]);
+  }, [turtle]);
+
+  const goalIsHere = (x: number, y: number) => {
+    console.log(x, y, goal);
+    return goal?.X === x && goal.Y === y;
   };
 
   const turtleIsHere = (x: number, y: number) =>
@@ -66,7 +78,8 @@ export const WorldStateComponent = ({
                   turtleIsHere(x, y) && styles.turtleCell
                 )}
               >
-                {turtleIsHere(x, y) && renderTurtle()}
+                {turtleIsHere(x, y) && turtleIcon}
+                {goalIsHere(x, y) && victoryFlag}
               </div>
             ))}
         </div>
